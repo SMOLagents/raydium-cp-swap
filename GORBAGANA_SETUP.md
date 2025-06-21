@@ -34,7 +34,7 @@ A modern, AI-powered decentralized exchange interface built on Solana using the 
 Create a `.env.local` file in the root directory:
 
 ```bash
-HELIUS_RPC_URL=https://mainnet.helius-rpc.com/?api-key=c55c146c-71ef-41b9-a574-cb08f359c00c
+HELIUS_RPC_URL=bozo
 OPENROUTER_API_KEY=your_openrouter_api_key_here
 OPENAI_API_KEY=your_openai_api_key_here
 ```
