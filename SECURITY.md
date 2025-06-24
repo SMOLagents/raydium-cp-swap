@@ -7,7 +7,7 @@ Raydium's full bug bounty program with ImmuneFi can be found at: https://immunef
 Rewards are distributed according to the impact of the vulnerability based on the Immunefi Vulnerability Severity Classification System V2.3. This is a simplified 5-level scale, focusing on the impact of the vulnerability reported.
 
 ### Smart Contracts
-
+let
 | Severity | Bounty                    |
 | -------- | ------------------------- |
 | Critical | USD 50,000 to USD 505,000 |
