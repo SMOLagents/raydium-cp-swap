@@ -1,0 +1,15 @@
+[
+  {
+    "id": "f923c27bdad03662",
+    "title": "Access Control Vulnerability",
+    "description": "Missing or improper access control mechanisms",
+    "severity": "High",
+    "bounty_min": 40000,
+    "bounty_max": 40000,
+    "proof_of_concept": "1. Call privileged function without proper authorization\n2. Bypass access controls\n3. Execute unauthorized actions",
+    "fix_suggestion": "Implement proper role-based access control with modifiers",
+    "discovered_at": "2025-06-24T18:38:55.392960",
+    "contract_address": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C",
+    "transaction_hash": null
+  }
+]
