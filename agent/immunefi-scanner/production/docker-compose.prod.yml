@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  scanner-api:
+    build:
+      context: ..
+      dockerfile: production/Dockerfile.scanner
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql://scanner:${DB_PASSWORD}@postgres:5432/immunefi_scanner
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    volumes:
+      - scanner_data:/app/data
+    networks:
+      - scanner_network
+
+  web-dashboard:
+    build:
+      context: ..
+      dockerfile: production/Dockerfile.web
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - scanner-api
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/ssl/certs
+    networks:
+      - scanner_network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: immunefi_scanner
+      POSTGRES_USER: scanner
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    networks:
+      - scanner_network
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - scanner_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+    networks:
+      - scanner_network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+    restart: unless-stopped
+    networks:
+      - scanner_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  scanner_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  scanner_network:
+    driver: bridge

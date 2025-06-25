@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Gorbagana Immunefi Scanner - 24/7 Live Monitoring</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="matrix-bg"></div>
+    
+    <header class="header">
+        <div class="header-content">
+            <h1 class="title">🤖 GORBAGANA IMMUNEFI SCANNER</h1>
+            <p class="subtitle">🛡️ 24/7 AI-Powered Vulnerability Detection • 💰 Live Bug Bounty Monitoring</p>
+            <div class="header-stats">
+                <div class="stat">
+                    <span class="stat-label">Status:</span>
+                    <span id="active-status" class="stat-value">🟢 ACTIVE</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Connection:</span>
+                    <span id="connection-status" class="stat-value">🟢 Connected</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Uptime:</span>
+                    <span id="uptime" class="stat-value">0m</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <!-- Control Panel -->
+        <section class="panel control-panel">
+            <h2 class="panel-title">🎛️ Control Panel</h2>
+            <div class="controls">
+                <button id="refresh-btn" class="btn btn-primary">🔄 Refresh Data</button>
+                <button id="export-btn" class="btn btn-secondary">📤 Export Data</button>
+                <button class="btn btn-info" onclick="window.open('/api/docs', '_blank')">📋 API Docs</button>
+            </div>
+        </section>
+
+        <!-- Live Statistics -->
+        <section class="panel stats-panel">
+            <h2 class="panel-title">📊 Live Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div id="total-vulnerabilities" class="stat-value">0</div>
+                    <div class="stat-label">Total Vulnerabilities</div>
+                </div>
+                <div class="stat-box critical">
+                    <div id="critical-count" class="stat-value">0</div>
+                    <div class="stat-label">Critical</div>
+                </div>
+                <div class="stat-box high">
+                    <div id="high-count" class="stat-value">0</div>
+                    <div class="stat-label">High</div>
+                </div>
+                <div class="stat-box medium">
+                    <div id="medium-count" class="stat-value">0</div>
+                    <div class="stat-label">Medium</div>
+                </div>
+                <div class="stat-box bounty">
+                    <div id="total-bounty" class="stat-value">$0</div>
+                    <div class="stat-label">Total Bounty Potential</div>
+                </div>
+                <div class="stat-box scans">
+                    <div id="total-scans" class="stat-value">0</div>
+                    <div class="stat-label">Total Scans</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scanner Status -->
+        <section class="panel scanner-panel">
+            <h2 class="panel-title">🔍 Scanner Status</h2>
+            <div class="scanner-visual">
+                <div class="radar-container">
+                    <div class="radar-sweep"></div>
+                    <div class="radar-center"></div>
+                </div>
+            </div>
+            <div class="scanner-info">
+                <div class="info-item">
+                    <span class="info-label">Mode:</span>
+                    <span class="info-value">24/7 Continuous</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Target:</span>
+                    <span class="info-value">Raydium CP Swap</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Classification:</span>
+                    <span class="info-value">Immunefi V2.3</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Last Heartbeat:</span>
+                    <span id="last-heartbeat" class="info-value">--:--:--</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Vulnerabilities -->
+        <section class="panel vulnerabilities-panel full-width">
+            <h2 class="panel-title">🚨 Live Vulnerability Feed</h2>
+            <div id="vulnerabilities-list" class="vulnerabilities-container">
+                <!-- Vulnerabilities will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Live Activity Log -->
+        <section class="panel logs-panel full-width">
+            <h2 class="panel-title">📜 Live Activity Log</h2>
+            <div class="terminal">
+                <div class="terminal-header">[GORBAGANA-SCANNER] Real-time Activity Feed</div>
+                <div id="activity-log" class="log-container">
+                    <div class="log-entry log-info">🚀 Scanner initialized and ready for 24/7 monitoring</div>
+                    <div class="log-entry log-success">✅ Database connection established</div>
+                    <div class="log-entry log-info">🔍 Beginning continuous vulnerability scanning...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>🤖 Gorbagana Immunefi Scanner v1.0 | 🛡️ AI-Powered Security | 💰 24/7 Bug Bounty Hunting</p>
+            <div class="footer-links">
+                <a href="/api/health">Health Check</a>
+                <a href="/api/docs">API Documentation</a>
+                <a href="https://immunefi.com">Immunefi Platform</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal for vulnerability details -->
+    <div id="vulnerability-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
