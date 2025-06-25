@@ -254,7 +254,7 @@ setup_systemd() {
     if [[ $EUID -eq 0 ]]; then
         print_info "Setting up systemd service..."
         
-        cat > /etc/systemd/system/gorbagana-scanner.service << EOF
+        sudo cat > /etc/systemd/system/gorbagana-scanner.service << EOF
 [Unit]
 Description=Gorbagana Immunefi Scanner
 Requires=docker.service
@@ -285,7 +285,7 @@ setup_log_rotation() {
     if [[ $EUID -eq 0 ]]; then
         print_info "Setting up log rotation..."
         
-        cat > /etc/logrotate.d/gorbagana-scanner << EOF
+        sudo cat > /etc/logrotate.d/gorbagana-scanner << EOF
 /var/lib/docker/containers/*/*-json.log {
     daily
     rotate 7

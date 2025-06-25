@@ -165,11 +165,21 @@ class VulnerabilityScanner:
     async def _check_access_control(self, contract_address: str) -> Optional[Dict[str, str]]:
         try:
             contract_code = await self._fetch_contract_code(contract_address)
-            if contract_code and "onlyowner" not in contract_code.lower():
-                return {
-                    "poc": "1. Call privileged function without proper authorization\n2. Bypass access controls\n3. Execute unauthorized actions",
-                    "fix": "Implement proper role-based access control with modifiers"
-                }
+            if contract_code:
+                # Enhanced access control checks for real vulnerabilities
+                code_lower = contract_code.lower()
+                vulnerability_patterns = [
+                    "owner" not in code_lower,
+                    "authority" not in code_lower, 
+                    "admin" not in code_lower,
+                    "require" not in code_lower
+                ]
+                
+                if any(vulnerability_patterns):
+                    return {
+                        "poc": "1. Call privileged function without proper authorization\n2. Bypass access controls\n3. Execute unauthorized actions",
+                        "fix": "Implement proper role-based access control with modifiers"
+                    }
         except Exception as e:
             logger.error(f"Error checking access control for {contract_address}: {e}")
         return None
