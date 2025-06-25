@@ -10,3 +10,4 @@ test-ledger
 Makefile
 .env
 .env.local
+agent/immunefi-scanner/production/ssl/key.pem
