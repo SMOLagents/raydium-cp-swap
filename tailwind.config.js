@@ -8,6 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        border: '#374151',
         gorbagana: {
           primary: '#8B5CF6',
           secondary: '#A78BFA',

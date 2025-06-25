@@ -4,7 +4,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-gray-600;
   }
   body {
     @apply bg-blockchain-gradient text-white font-sans;
