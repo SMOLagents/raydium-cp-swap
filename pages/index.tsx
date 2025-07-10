@@ -1,13 +1,28 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
-import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
-import { motion } from 'framer-motion'
-import { ArrowUpDown, Zap, TrendingUp, Sparkles, Bot } from 'lucide-react'
-import SwapInterface from '../components/SwapInterface'
-import AIAssistant from '../components/AIAssistant'
-import TokenInfo from '../components/TokenInfo'
-import Header from '../components/Header'
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
+
+import { motion } from 'framer-motion';
+import {
+  Bot,
+  Sparkles,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
+
+import {
+  useConnection,
+  useWallet,
+} from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+
+import AIAssistant from '../components/AIAssistant';
+import Header from '../components/Header';
+import SwapInterface from '../components/SwapInterface';
+import TokenInfo from '../components/TokenInfo';
 
 // Gorbagana token address
 const GORBAGANA_TOKEN = 'h66r4cb3lrvezown6ejzxmvbjrzxmrzprt7z6amexunb'
@@ -171,4 +186,4 @@ export default function Home() {
       </main>
     </div>
   )
-} 
+}

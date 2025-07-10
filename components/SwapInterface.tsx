@@ -1,16 +1,29 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react'
-import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js'
-import { motion } from 'framer-motion'
-import { ArrowUpDown, RefreshCw, Settings, Zap } from 'lucide-react'
-import { BN } from '@coral-xyz/anchor'
-import RaydiumSwapSDK, { 
-  GORBAGANA_TOKEN_MINT, 
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+
+import { motion } from 'framer-motion';
+import {
+  ArrowUpDown,
+  RefreshCw,
+  Settings,
+  Zap,
+} from 'lucide-react';
+
+import { BN } from '@coral-xyz/anchor';
+import {
+  useConnection,
+  useWallet,
+} from '@solana/wallet-adapter-react';
+import { PublicKey } from '@solana/web3.js';
+
+import RaydiumSwapSDK, {
+  formatTokenAmount,
   SOL_MINT,
-  sortTokenMints,
-  calculateSlippage,
-  formatTokenAmount
-} from '../lib/raydium-swap'
+} from '../lib/raydium-swap';
 
 interface SwapInterfaceProps {
   gorbaganaToken: string
@@ -36,8 +49,13 @@ const SwapInterface: React.FC<SwapInterfaceProps> = ({
   const { connection } = useConnection()
   const { publicKey, sendTransaction } = useWallet()
   
-  // Initialize Raydium SDK
-  const raydiumSDK = useMemo(() => new RaydiumSwapSDK(connection), [connection])
+  // Initialize Grin Gobbler Raydium SDK
+  const raydiumSDK = useMemo(() => {
+    const sdk = new RaydiumSwapSDK(connection)
+    // Initialize the Grin Gobbler technology
+    sdk.initialize().catch(console.error)
+    return sdk
+  }, [connection])
   
   // State
   const [fromToken, setFromToken] = useState<TokenInfo>({
@@ -379,4 +397,4 @@ const SwapInterface: React.FC<SwapInterfaceProps> = ({
   )
 }
 
-export default SwapInterface 
+export default SwapInterface

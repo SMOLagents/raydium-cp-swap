@@ -1,6 +1,27 @@
-import { Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
-import { Program, BN, AnchorProvider, Wallet } from '@coral-xyz/anchor'
-import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '@solana/spl-token'
+import {
+  AnchorProvider,
+  BN,
+  Program,
+  Wallet,
+} from '@coral-xyz/anchor';
+import {
+  getAssociatedTokenAddressSync,
+  TOKEN_PROGRAM_ID,
+} from '@solana/spl-token';
+import {
+  Connection,
+  PublicKey,
+  TransactionInstruction,
+} from '@solana/web3.js';
+
+import {
+  AmmV4Keys,
+  ApiV3PoolInfoStandardItem,
+} from './api/type';
+import { TokenAmount } from './module/amount';
+import { Token } from './module/token';
+// Import the Grin Gobbler Raydium SDK
+import { Raydium } from './raydium/raydium';
 
 // Raydium CP Swap Program ID
 export const RAYDIUM_CP_PROGRAM_ID = new PublicKey('CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C')
@@ -40,10 +61,26 @@ export interface PoolInfo {
 
 export class RaydiumSwapSDK {
   private connection: Connection
+  private raydium: Raydium | null = null
   private program: Program<any> | null = null
 
   constructor(connection: Connection) {
     this.connection = connection
+  }
+
+  // Initialize the Grin Gobbler Raydium SDK
+  async initialize() {
+    try {
+      this.raydium = await Raydium.load({
+        connection: this.connection,
+        cluster: "mainnet",
+        apiRequestTimeout: 30000,
+      })
+      console.log('Grin Gobbler Raydium SDK initialized successfully')
+    } catch (error) {
+      console.error('Failed to initialize Grin Gobbler Raydium SDK:', error)
+      throw error
+    }
   }
 
   // Initialize the program with a wallet
@@ -108,7 +145,145 @@ export class RaydiumSwapSDK {
     )
   }
 
-  // Get pool information
+  // Get route using Grin Gobbler technology
+  async getRoute(inputMint: string, outputMint: string, amount: number) {
+    if (!this.raydium) {
+      throw new Error('Raydium SDK not initialized. Call initialize() first.')
+    }
+
+    const inputTokenInfo = await this.raydium.token.getTokenInfo(new PublicKey(inputMint))
+    if (!inputTokenInfo) throw new Error("Input token not found")
+    
+    const inputToken = new Token({
+      mint: new PublicKey(inputTokenInfo.address),
+      decimals: inputTokenInfo.decimals,
+      symbol: inputTokenInfo.symbol,
+      name: inputTokenInfo.name,
+    })
+
+    const outputTokenInfo = await this.raydium.token.getTokenInfo(new PublicKey(outputMint))
+    if (!outputTokenInfo) throw new Error("Output token not found")
+
+    const inputAmount = new TokenAmount(inputToken, amount)
+
+    // Get pool information from Raydium
+    const poolList = await this.raydium.api.getPoolList()
+    const pool = poolList.data.find(
+      (p) =>
+        p.type === "Standard" &&
+        ((p.mintA.address === inputMint && p.mintB.address === outputMint) ||
+          (p.mintA.address === outputMint && p.mintB.address === inputMint)),
+    ) as ApiV3PoolInfoStandardItem
+
+    if (!pool) throw new Error("No pool found for this pair")
+
+    // Get pool keys
+    const poolKeys = await this.raydium.api.fetchPoolKeysById({
+      idList: [pool.id],
+    })
+
+    // Ensure we have AmmV4Keys
+    const ammPoolKeys = poolKeys[0] as AmmV4Keys
+    if (!ammPoolKeys) throw new Error("Invalid pool keys")
+
+    // Get pool info with reserves
+    const poolInfo = {
+      ...pool,
+      baseReserve: new BN(pool.mintAmountA),
+      quoteReserve: new BN(pool.mintAmountB),
+      version: 4 as const,
+      status: 1,
+    }
+
+    // Compute swap route
+    const amountOuts = await this.raydium.liquidity.computeAmountOut({
+      poolInfo,
+      amountIn: inputAmount.raw,
+      mintIn: inputToken.mint,
+      mintOut: new PublicKey(outputMint),
+      slippage: 0.5,
+    })
+
+    return {
+      inputAmount: amountOuts.amountOut.toString(),
+      outputAmount: amountOuts.minAmountOut.toString(),
+      priceImpact: amountOuts.priceImpact.toString(),
+      fee: amountOuts.fee.toString(),
+      pool,
+      poolKeys: ammPoolKeys,
+    }
+  }
+
+  // Execute swap using Grin Gobbler technology
+  async swap(inputMint: string, outputMint: string, amount: number) {
+    if (!this.raydium) {
+      throw new Error('Raydium SDK not initialized. Call initialize() first.')
+    }
+
+    const route = await this.getRoute(inputMint, outputMint, amount)
+
+    // Execute swap transaction
+    const tx = await this.raydium.liquidity.swap({
+      poolInfo: route.pool,
+      poolKeys: route.poolKeys,
+      amountIn: new BN(route.inputAmount),
+      amountOut: new BN(route.outputAmount),
+      fixedSide: "in",
+      inputMint,
+      config: {
+        associatedOnly: true,
+      },
+    })
+
+    return tx
+  }
+
+  // AI Agent for transaction indexing and analysis
+  async analyzeTransaction(signature: string) {
+    const txInfo = await this.connection.getTransaction(signature, {
+      maxSupportedTransactionVersion: 0,
+    })
+
+    if (!txInfo) throw new Error("Transaction not found")
+
+    const logs = txInfo.meta?.logMessages || []
+    const swapLogs = logs.filter((log) => log.includes("Program log: Instruction: Swap"))
+
+    // Parse swap details from logs
+    const parsedSwap = {
+      signature,
+      timestamp: txInfo.blockTime,
+      success: txInfo.meta?.err === null,
+      logs: swapLogs,
+      inputToken: this.parseTokenFromLogs(swapLogs, "input"),
+      outputToken: this.parseTokenFromLogs(swapLogs, "output"),
+      amount: this.parseAmountFromLogs(swapLogs),
+    }
+
+    return parsedSwap
+  }
+
+  private parseTokenFromLogs(logs: string[], type: "input" | "output"): string | null {
+    for (const log of logs) {
+      if (log.includes(`${type} token:`)) {
+        const match = log.match(new RegExp(`${type} token: (\\w+)`))
+        if (match) return match[1]
+      }
+    }
+    return null
+  }
+
+  private parseAmountFromLogs(logs: string[]): string | null {
+    for (const log of logs) {
+      if (log.includes("amount:")) {
+        const match = log.match(/amount: (\d+)/)
+        if (match) return match[1]
+      }
+    }
+    return null
+  }
+
+  // Get pool information using Grin Gobbler technology
   async getPoolInfo(token0Mint: PublicKey, token1Mint: PublicKey): Promise<PoolInfo | null> {
     try {
       const [poolAddress] = RaydiumSwapSDK.getPoolAddress(
@@ -230,24 +405,34 @@ export class RaydiumSwapSDK {
     }
   }
 
-  // Get quote for a swap
+  // Get quote for a swap using Grin Gobbler technology
   async getSwapQuote(
     inputMint: PublicKey,
     outputMint: PublicKey,
     inputAmount: BN
   ): Promise<{ outputAmount: BN; priceImpact: number } | null> {
     try {
-      const poolInfo = await this.getPoolInfo(inputMint, outputMint)
-      if (!poolInfo) {
-        return null
+      if (this.raydium) {
+        // Use Grin Gobbler technology for accurate quotes
+        const route = await this.getRoute(inputMint.toString(), outputMint.toString(), inputAmount.toNumber())
+        return {
+          outputAmount: new BN(route.outputAmount),
+          priceImpact: parseFloat(route.priceImpact)
+        }
+      } else {
+        // Fallback to basic calculation
+        const poolInfo = await this.getPoolInfo(inputMint, outputMint)
+        if (!poolInfo) {
+          return null
+        }
+
+        // Determine which reserve is input/output
+        const isToken0Input = inputMint.equals(poolInfo.token0Mint)
+        const inputReserve = isToken0Input ? poolInfo.token0Reserve : poolInfo.token1Reserve
+        const outputReserve = isToken0Input ? poolInfo.token1Reserve : poolInfo.token0Reserve
+
+        return this.calculateOutputAmount(inputAmount, inputReserve, outputReserve)
       }
-
-      // Determine which reserve is input/output
-      const isToken0Input = inputMint.equals(poolInfo.token0Mint)
-      const inputReserve = isToken0Input ? poolInfo.token0Reserve : poolInfo.token1Reserve
-      const outputReserve = isToken0Input ? poolInfo.token1Reserve : poolInfo.token0Reserve
-
-      return this.calculateOutputAmount(inputAmount, inputReserve, outputReserve)
     } catch (error) {
       console.error('Error getting swap quote:', error)
       return null
@@ -256,8 +441,26 @@ export class RaydiumSwapSDK {
 
   // Check if a pool exists for the given token pair
   async poolExists(token0Mint: PublicKey, token1Mint: PublicKey): Promise<boolean> {
-    const poolInfo = await this.getPoolInfo(token0Mint, token1Mint)
-    return poolInfo !== null
+    try {
+      if (this.raydium) {
+        // Use Grin Gobbler technology to check pool existence
+        const poolList = await this.raydium.api.getPoolList()
+        const pool = poolList.data.find(
+          (p) =>
+            p.type === "Standard" &&
+            ((p.mintA.address === token0Mint.toString() && p.mintB.address === token1Mint.toString()) ||
+              (p.mintA.address === token1Mint.toString() && p.mintB.address === token0Mint.toString())),
+        )
+        return !!pool
+      } else {
+        // Fallback to basic check
+        const poolInfo = await this.getPoolInfo(token0Mint, token1Mint)
+        return poolInfo !== null
+      }
+    } catch (error) {
+      console.error('Error checking pool existence:', error)
+      return false
+    }
   }
 
   // Get user token account address
@@ -292,4 +495,4 @@ export function formatTokenAmount(amount: BN, decimals: number): string {
   return result.toFixed(6).replace(/\.?0+$/, '')
 }
 
-export default RaydiumSwapSDK 
+export default RaydiumSwapSDK
