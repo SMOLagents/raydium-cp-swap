@@ -4,7 +4,6 @@ import {
   useState,
 } from 'react';
 
-import { motion } from 'framer-motion';
 import {
   Bot,
   Sparkles,
@@ -19,7 +18,6 @@ import {
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
-import AIAssistant from '../components/AIAssistant';
 import Header from '../components/Header';
 import SwapInterface from '../components/SwapInterface';
 import TokenInfo from '../components/TokenInfo';
@@ -65,30 +63,17 @@ export default function Home() {
       
       <main className="container mx-auto px-4 py-8">
         {/* Hero Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-6">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              className="mr-4"
-            >
+            <div className="mr-4">
               <Sparkles className="w-12 h-12 text-gorbagana-primary" />
-            </motion.div>
+            </div>
             <h1 className="text-6xl font-bold bg-gorbagana-gradient bg-clip-text text-transparent">
               Gorbagana Swap
             </h1>
-            <motion.div
-              animate={{ rotate: -360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              className="ml-4"
-            >
+            <div className="ml-4">
               <Zap className="w-12 h-12 text-gorbagana-secondary" />
-            </motion.div>
+            </div>
           </div>
           
           <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
@@ -97,41 +82,26 @@ export default function Home() {
           </p>
 
           {!connected && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 }}
-              className="mb-8"
-            >
+            <div className="mb-8">
               <WalletMultiButton className="gorbagana-button text-lg px-8 py-4" />
-            </motion.div>
+            </div>
           )}
-        </motion.div>
+        </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Swap Interface */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="lg:col-span-2"
-          >
+          <div className="lg:col-span-2">
             <SwapInterface 
               gorbaganaToken={GORBAGANA_TOKEN}
               connected={connected}
               balance={balance}
               onRefreshBalance={fetchBalances}
             />
-          </motion.div>
+          </div>
 
           {/* Side Panel */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="space-y-6"
-          >
+          <div className="space-y-6">
             {/* Wallet Info */}
             {connected && (
               <div className="gorbagana-card p-6">
@@ -160,28 +130,29 @@ export default function Home() {
             <TokenInfo tokenAddress={GORBAGANA_TOKEN} />
 
             {/* AI Assistant Toggle */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={() => setShowAI(!showAI)}
               className="w-full gorbagana-button flex items-center justify-center"
             >
               <Bot className="w-5 h-5 mr-2" />
               {showAI ? 'Hide' : 'Show'} AI Assistant
-            </motion.button>
-          </motion.div>
+            </button>
+          </div>
         </div>
 
         {/* AI Assistant */}
         {showAI && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mt-8"
-          >
-            <AIAssistant />
-          </motion.div>
+          <div className="mt-8">
+            <div className="gorbagana-card p-6">
+              <h3 className="text-xl font-semibold mb-4 flex items-center">
+                <Bot className="w-5 h-5 mr-2 text-gorbagana-primary" />
+                AI Assistant (Coming Soon)
+              </h3>
+              <p className="text-gray-400">
+                AI-powered trading insights and recommendations will be available here.
+              </p>
+            </div>
+          </div>
         )}
       </main>
     </div>

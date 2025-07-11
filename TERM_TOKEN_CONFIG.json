@@ -1,0 +1,17 @@
+{
+  "name": "TERM Token",
+  "symbol": "TERM",
+  "mint": "32NGEwwraVRcqA3q41Fs2r21pW2VvAg6AwL5QtKV5vpf",
+  "decimals": 9,
+  "supply": 1000000,
+  "authority": "Ah6oiv6kZ3VyKWTd45a1ty3RymCorY8excDq6CPZsqah",
+  "tokenAccount": "2xaM15Uq5KZ9KkfSnTBNG7SBe7aHZXttyW4jZLDTLCAf",
+  "network": "devnet",
+  "description": "TERM token created for Gorbagana Swap integration with Grin Gobbler AI technology",
+  "created": "2025-01-09T22:08:00Z",
+  "features": [
+    "AI-powered trading",
+    "Grin Gobbler integration",
+    "Raydium CP swap compatible"
+  ]
+}
